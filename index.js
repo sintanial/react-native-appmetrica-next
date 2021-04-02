@@ -111,6 +111,10 @@ export default {
     AppMetrica.requestAppMetricaDeviceID(listener);
   },
 
+  requestDeferredDeeplinkParameters(listener: (params?: Object, reason?: string) => void) {
+    AppMetrica.requestAppMetricaDeviceID(listener);
+  },
+
   resumeSession() {
     AppMetrica.resumeSession();
   },
