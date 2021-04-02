@@ -10,15 +10,19 @@ package com.yandex.metrica.plugin.reactnative;
 
 import android.location.Location;
 import android.util.Log;
-
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
 import com.yandex.metrica.PreloadInfo;
 import com.yandex.metrica.YandexMetricaConfig;
+import com.yandex.metrica.profile.Attribute;
 import com.yandex.metrica.profile.GenderAttribute;
 import com.yandex.metrica.profile.UserProfile;
-import com.yandex.metrica.profile.Attribute;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.util.Iterator;
 import java.util.Map;
 
 abstract class Utils {
@@ -30,9 +34,9 @@ abstract class Utils {
         }
         String floor = configMap.getString("floor");
         Log.w("TAG", floor);
-        if (configMap.hasKey("floor") &&  "male".equals(configMap.getString("floor"))) {
+        if (configMap.hasKey("floor") && "male".equals(configMap.getString("floor"))) {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.MALE));
-        } else if(configMap.hasKey("floor") && "female".equals(configMap.getString("floor"))) {
+        } else if (configMap.hasKey("floor") && "female".equals(configMap.getString("floor"))) {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.FEMALE));
         }
         if (configMap.hasKey("age")) {
@@ -41,7 +45,108 @@ abstract class Utils {
         if (configMap.hasKey("isNotification")) {
             userProfile.apply(Attribute.notificationsEnabled().withValue(configMap.getBoolean("isNotification")));
         }
+
+        ReadableMapKeySetIterator iterator = configMap.keySetIterator();
+
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            ReadableType type = configMap.getType(key);
+
+            if (key.equals("name") || key.equals("floor") || key.equals("age") || key.equals("isNotification")) {
+                continue;
+            }
+
+            switch (type) {
+                case Boolean:
+                    userProfile.apply(Attribute.customBoolean(key).withValue(configMap.getBoolean(key)));
+                    break;
+                case Number:
+                    userProfile.apply(Attribute.customNumber(key).withValue(configMap.getDouble(key)));
+                    break;
+                case String:
+                    userProfile.apply(Attribute.customString(key).withValue(configMap.getString(key)));
+                    break;
+                case Map:
+                    try {
+                        userProfile.apply(Attribute.customString(key).withValue(toJSONObject(configMap.getMap(key)).toString()));
+                    } catch (JSONException e) {
+                    }
+                    break;
+                case Array:
+                    try {
+                        userProfile.apply(Attribute.customString(key).withValue(toJSONArray(configMap.getArray(key)).toString()));
+                    } catch (JSONException e) {
+                    }
+                    break;
+            }
+        }
+
         return userProfile.build();
+    }
+
+    static JSONObject toJSONObject(ReadableMap readableMap) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+
+        ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+
+        while (iterator.hasNextKey()) {
+            String key = iterator.nextKey();
+            ReadableType type = readableMap.getType(key);
+
+            switch (type) {
+                case Null:
+                    jsonObject.put(key, null);
+                    break;
+                case Boolean:
+                    jsonObject.put(key, readableMap.getBoolean(key));
+                    break;
+                case Number:
+                    jsonObject.put(key, readableMap.getDouble(key));
+                    break;
+                case String:
+                    jsonObject.put(key, readableMap.getString(key));
+                    break;
+                case Map:
+                    jsonObject.put(key, toJSONObject(readableMap.getMap(key)));
+                    break;
+                case Array:
+                    jsonObject.put(key, toJSONArray(readableMap.getArray(key)));
+                    break;
+            }
+        }
+
+        return jsonObject;
+    }
+
+    static JSONArray toJSONArray(ReadableArray readableArray) throws JSONException {
+        JSONArray jsonArray = new JSONArray();
+
+        for (int i = 0; i < readableArray.size(); i++) {
+            ReadableType type = readableArray.getType(i);
+
+            switch (type) {
+                case Null:
+                    jsonArray.put(i, null);
+                    break;
+                case Boolean:
+                    jsonArray.put(i, readableArray.getBoolean(i));
+                    break;
+                case Number:
+                    jsonArray.put(i, readableArray.getDouble(i));
+                    break;
+                case String:
+                    jsonArray.put(i, readableArray.getString(i));
+                    break;
+                case Map:
+                    jsonArray.put(i, toJSONObject(readableArray.getMap(i)));
+                    break;
+                case Array:
+                    jsonArray.put(i, toJSONArray(readableArray.getArray(i)));
+                    break;
+            }
+        }
+
+        return jsonArray;
     }
 
     static YandexMetricaConfig toYandexMetricaConfig(ReadableMap configMap) {

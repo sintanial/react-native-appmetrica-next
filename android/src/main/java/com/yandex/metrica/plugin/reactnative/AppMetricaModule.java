@@ -116,6 +116,11 @@ public class AppMetricaModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void requestDeferredDeeplinkParameters(Callback listener) {
+        YandexMetrica.requestDeferredDeeplinkParameters(new ReactNativeAppMetricaDeferredDeeplinkParametersListener(listener));
+    }
+
+    @ReactMethod
     public void resumeSession() {
         YandexMetrica.resumeSession(getCurrentActivity());
     }
