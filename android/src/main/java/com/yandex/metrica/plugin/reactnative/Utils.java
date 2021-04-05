@@ -28,18 +28,21 @@ abstract class Utils {
 
     static UserProfile toYandexProfileConfig(ReadableMap configMap) {
         UserProfile.Builder userProfile = UserProfile.newBuilder();
+
         if (configMap.hasKey("name")) {
             userProfile.apply(Attribute.name().withValue(configMap.getString("name")));
         }
-        String floor = configMap.getString("floor");
+
         if (configMap.hasKey("floor") && "male".equals(configMap.getString("floor"))) {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.MALE));
         } else if (configMap.hasKey("floor") && "female".equals(configMap.getString("floor"))) {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.FEMALE));
         }
+
         if (configMap.hasKey("age")) {
             userProfile.apply(Attribute.birthDate().withAge(configMap.getInt("age")));
         }
+
         if (configMap.hasKey("isNotification")) {
             userProfile.apply(Attribute.notificationsEnabled().withValue(configMap.getBoolean("isNotification")));
         }
@@ -67,13 +70,15 @@ abstract class Utils {
                 case Map:
                     try {
                         userProfile.apply(Attribute.customString(key).withValue(toJSONObject(configMap.getMap(key)).toString()));
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
+                        System.out.println("[APPMETRICA DEBUG] OBJECT EXCEPTION" + e.getMessage());
                     }
                     break;
                 case Array:
                     try {
                         userProfile.apply(Attribute.customString(key).withValue(toJSONArray(configMap.getArray(key)).toString()));
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
+                        System.out.println("[APPMETRICA DEBUG] ARRAY EXCEPTION" + e.getMessage());
                     }
                     break;
             }
