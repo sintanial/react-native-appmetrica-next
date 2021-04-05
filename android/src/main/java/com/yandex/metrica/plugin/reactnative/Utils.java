@@ -29,13 +29,9 @@ abstract class Utils {
     static UserProfile toYandexProfileConfig(ReadableMap configMap) {
         UserProfile.Builder userProfile = UserProfile.newBuilder();
 
-        System.out.println("[APPMETRICA DEBUG] 1");
-
         if (configMap.hasKey("name")) {
             userProfile.apply(Attribute.name().withValue(configMap.getString("name")));
         }
-
-        System.out.println("[APPMETRICA DEBUG] 2");
 
         if (configMap.hasKey("floor") && "male".equals(configMap.getString("floor"))) {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.MALE));
@@ -43,19 +39,13 @@ abstract class Utils {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.FEMALE));
         }
 
-        System.out.println("[APPMETRICA DEBUG] 3");
-
         if (configMap.hasKey("age")) {
             userProfile.apply(Attribute.birthDate().withAge(configMap.getInt("age")));
         }
 
-        System.out.println("[APPMETRICA DEBUG] 4");
-
         if (configMap.hasKey("isNotification")) {
             userProfile.apply(Attribute.notificationsEnabled().withValue(configMap.getBoolean("isNotification")));
         }
-
-        System.out.println("[APPMETRICA DEBUG] 5");
 
         ReadableMapKeySetIterator iterator = configMap.keySetIterator();
 
@@ -80,15 +70,13 @@ abstract class Utils {
                 case Map:
                     try {
                         userProfile.apply(Attribute.customString(key).withValue(toJSONObject(configMap.getMap(key)).toString()));
-                    } catch (Exception e) {
-                        System.out.println("[APPMETRICA DEBUG] OBJECT EXCEPTION" + e.getMessage());
+                    } catch (JSONException e) {
                     }
                     break;
                 case Array:
                     try {
                         userProfile.apply(Attribute.customString(key).withValue(toJSONArray(configMap.getArray(key)).toString()));
-                    } catch (Exception e) {
-                        System.out.println("[APPMETRICA DEBUG] ARRAY EXCEPTION" + e.getMessage());
+                    } catch (JSONException e) {
                     }
                     break;
             }
