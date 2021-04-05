@@ -29,9 +29,13 @@ abstract class Utils {
     static UserProfile toYandexProfileConfig(ReadableMap configMap) {
         UserProfile.Builder userProfile = UserProfile.newBuilder();
 
+        System.out.println("[APPMETRICA DEBUG] 1");
+
         if (configMap.hasKey("name")) {
             userProfile.apply(Attribute.name().withValue(configMap.getString("name")));
         }
+
+        System.out.println("[APPMETRICA DEBUG] 2");
 
         if (configMap.hasKey("floor") && "male".equals(configMap.getString("floor"))) {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.MALE));
@@ -39,13 +43,19 @@ abstract class Utils {
             userProfile.apply(Attribute.gender().withValue(GenderAttribute.Gender.FEMALE));
         }
 
+        System.out.println("[APPMETRICA DEBUG] 3");
+
         if (configMap.hasKey("age")) {
             userProfile.apply(Attribute.birthDate().withAge(configMap.getInt("age")));
         }
 
+        System.out.println("[APPMETRICA DEBUG] 4");
+
         if (configMap.hasKey("isNotification")) {
             userProfile.apply(Attribute.notificationsEnabled().withValue(configMap.getBoolean("isNotification")));
         }
+
+        System.out.println("[APPMETRICA DEBUG] 5");
 
         ReadableMapKeySetIterator iterator = configMap.keySetIterator();
 
